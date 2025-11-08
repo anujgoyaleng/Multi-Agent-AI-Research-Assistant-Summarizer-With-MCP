@@ -132,17 +132,47 @@ The app will open automatically at `http://localhost:8501` 🚀
 - ✅ API key secured in `.env` file
 - ✅ No tracking or analytics
 
+## ☁️ Deployment to Streamlit Cloud
+
+1. **Push to GitHub**
+   ```bash
+   git add .
+   git commit -m "Deploy AI Research Assistant"
+   git push origin main
+   ```
+
+2. **Deploy on Streamlit Cloud**
+   - Go to [share.streamlit.io](https://share.streamlit.io)
+   - Click "New app"
+   - Select your repository and branch
+   - Set main file path: `app.py`
+
+3. **Add Secrets**
+   - In your app settings, go to "Secrets"
+   - Add your API key:
+     ```toml
+     api_key = "your_google_gemini_api_key_here"
+     ```
+
+4. **Deploy!**
+   - Click "Deploy" and your app will be live!
+
 ## 🐛 Troubleshooting
 
 **App won't start?**
 - Ensure Python 3.8+ is installed
 - Check that all dependencies are installed
-- Verify your API key in `.env` file
+- Verify your API key in `.env` file (local) or Streamlit secrets (cloud)
 
 **API errors?**
 - Confirm your Gemini API key is valid
 - Check your internet connection
 - Ensure you haven't exceeded API rate limits
+
+**Deployment errors?**
+- Make sure you've added the API key to Streamlit secrets
+- Check that all dependencies are in `requirements.txt`
+- Verify the main file path is set to `app.py`
 
 **Reports not saving?**
 - Check write permissions in the project folder

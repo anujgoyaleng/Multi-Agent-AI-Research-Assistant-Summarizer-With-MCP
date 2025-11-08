@@ -5,6 +5,7 @@ Initializes and provides Google Gemini AI instance
 from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
 import os
+import streamlit as st
 
 load_dotenv()
 
@@ -15,9 +16,14 @@ def get_llm():
     Returns:
         ChatGoogleGenerativeAI: Configured Gemini AI instance
     """
-    api_key = os.getenv("api_key")
+    # Try Streamlit secrets first (for deployment), then fall back to env variable
+    try:
+        api_key = st.secrets.get("api_key")
+    except:
+        api_key = os.getenv("api_key")
+    
     if not api_key:
-        raise ValueError("API key not found. Please set 'api_key' in your .env file")
+        raise ValueError("API key not found. Please set 'api_key' in your .env file or Streamlit secrets")
     
     return ChatGoogleGenerativeAI(
         model="gemini-2.0-flash",

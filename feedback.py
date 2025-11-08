@@ -9,8 +9,15 @@ from pydantic import BaseModel, Field
 from typing import Literal
 from llm import get_llm
 
-# Initialize LLM
-gemini_llm = get_llm()
+# LLM will be initialized lazily when needed
+_gemini_llm = None
+
+def get_gemini_llm():
+    """Lazy initialization of Gemini LLM"""
+    global _gemini_llm
+    if _gemini_llm is None:
+        _gemini_llm = get_llm()
+    return _gemini_llm
 
 # Feedback Schema
 class FeedbackSentiment(BaseModel):
@@ -34,9 +41,6 @@ classify_prompt = PromptTemplate(
     partial_variables={"format_instruction": pydantic_parse.get_format_instructions()}
 )
 
-# Classification Chain
-classify_chain = classify_prompt | gemini_llm | pydantic_parse
-
 # Response Prompts
 positive_prompt = PromptTemplate(
     input_variables=['feedback'],
@@ -58,16 +62,6 @@ negative_prompt = PromptTemplate(
     Keep it concise (1-2 sentences), acknowledge their concerns, and show commitment to improvement."""
 )
 
-# Feedback Response Chain
-feedback_chain = RunnableBranch(
-    (lambda x: x.sentiment == "positive", positive_prompt | gemini_llm | str_parse),
-    (lambda x: x.sentiment == "negative", negative_prompt | gemini_llm | str_parse),
-    RunnableLambda(lambda x: "Thank you for your feedback! We appreciate your input.")
-)
-
-# Main Chain
-main_chain = classify_chain | feedback_chain
-
 def get_feedback(feedback: str) -> str:
     """
     Analyze feedback sentiment and generate appropriate response
@@ -79,6 +73,19 @@ def get_feedback(feedback: str) -> str:
         str: AI-generated response based on sentiment
     """
     try:
+        # Get LLM instance lazily
+        llm = get_gemini_llm()
+        
+        # Build chains dynamically
+        classify_chain = classify_prompt | llm | pydantic_parse
+        
+        feedback_chain = RunnableBranch(
+            (lambda x: x.sentiment == "positive", positive_prompt | llm | str_parse),
+            (lambda x: x.sentiment == "negative", negative_prompt | llm | str_parse),
+            RunnableLambda(lambda x: "Thank you for your feedback! We appreciate your input.")
+        )
+        
+        main_chain = classify_chain | feedback_chain
         result = main_chain.invoke({'feedback': feedback})
         return result
     except Exception as e:
