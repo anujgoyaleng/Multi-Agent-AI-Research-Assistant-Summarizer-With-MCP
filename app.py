@@ -6,23 +6,42 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from dotenv import load_dotenv
 from feedback import get_feedback
+from api_key_manager import get_active_api_key, render_api_key_settings, initialize_api_key_from_storage
 
 load_dotenv()
 
-# Initialize LLM
+# Initialize API key from storage
+initialize_api_key_from_storage()
+
+# Initialize LLM with dynamic API key
 @st.cache_resource
-def get_llm_instance():
+def get_llm_instance(_api_key):
+    """Get LLM instance with provided API key"""
+    if not _api_key:
+        raise ValueError("No API key available. Please configure your API key.")
     return ChatGoogleGenerativeAI(
         model="gemini-2.0-flash",
-        api_key=os.getenv("api_key"),
+        api_key=_api_key,
         temperature=0.7,
         max_tokens=2048
     )
 
-llm = get_llm_instance()
-str_parse = StrOutputParser()
+# Get active API key and initialize LLM
+active_api_key = get_active_api_key()
+if active_api_key:
+    try:
+        llm = get_llm_instance(active_api_key)
+        str_parse = StrOutputParser()
+        st.session_state['app_ready'] = True
+    except Exception as e:
+        llm = None
+        st.session_state['app_ready'] = False
+        st.error(f"Error initializing LLM: {str(e)}")
+else:
+    llm = None
+    st.session_state['app_ready'] = False
 
-# Ultra-Minimal Modular Black & Grey Theme
+# Modern Elegant Professional Theme
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap');
@@ -33,59 +52,65 @@ st.markdown("""
         padding: 0;
     }
     
-    /* Main App Background - Pure Black */
+    /* Main App Background - Elegant Dark */
     .stApp {
-        background: #000000;
+        background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
     }
     
     /* Fixed Sidebar */
     [data-testid="stSidebar"] {
-        background: #0a0a0a;
-        border-right: 1px solid #1a1a1a;
+        background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
+        border-right: 1px solid #2a2a2a;
         position: fixed;
         height: 100vh;
         overflow-y: auto;
     }
     
     [data-testid="stSidebar"] > div:first-child {
-        background: #0a0a0a;
+        background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
     }
     
-    /* Main Content Area - Minimal */
+    /* Main Content Area - Professional */
     .main {
-        background: #000000;
-        padding: 3rem 4rem;
+        background: transparent;
+        padding: 2.5rem 3.5rem;
         margin-left: 0;
     }
     
     .block-container {
-        padding: 2rem 1rem;
+        padding: 2rem 1.5rem;
         max-width: 1400px;
+        margin: 0 auto;
     }
     
-    /* Minimal Buttons */
+    /* Standardized Professional Buttons */
     .stButton>button {
-        background: #1a1a1a;
+        background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
         color: #ffffff;
-        border-radius: 8px;
-        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        padding: 0.7rem 1.8rem;
         border: 1px solid #2a2a2a;
-        font-weight: 600;
-        font-size: 0.9rem;
-        transition: all 0.2s ease;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: none;
+        letter-spacing: 0.3px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        height: 44px;
+        min-width: 140px;
     }
     
     .stButton>button:hover {
-        background: #2a2a2a;
+        background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
         border-color: #3a3a3a;
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.5);
     }
     
     .stButton>button:active {
         transform: translateY(0);
-        background: #151515;
+        background: linear-gradient(135deg, #151515 0%, #0a0a0a 100%);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.4);
     }
     
     /* Minimal Input Fields */
@@ -237,18 +262,43 @@ st.markdown("""
         background: transparent;
     }
     
-    /* Minimal Fixed Sidebar */
+    /* Enhanced Sidebar */
     .sidebar .sidebar-content {
-        background: #0a0a0a;
+        background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
         border-right: 1px solid #1a1a1a;
     }
     
     [data-testid="stSidebar"] {
-        background: #0a0a0a;
+        background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
     }
     
     [data-testid="stSidebarNav"] {
         background: #0a0a0a;
+    }
+    
+    [data-testid="stSidebar"] > div:first-child {
+        background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
+    }
+    
+    /* Sidebar Button Enhancements */
+    [data-testid="stSidebar"] .stButton>button {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+        border: 1px solid #2a2a2a;
+        transition: all 0.3s ease;
+    }
+    
+    [data-testid="stSidebar"] .stButton>button:hover {
+        background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+        border-color: #3a3a3a;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    
+    /* Sidebar Form Buttons */
+    [data-testid="stSidebar"] .stFormSubmitButton>button {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
     }
     
     /* Minimal Download Button */
@@ -270,23 +320,48 @@ st.markdown("""
         border-color: #3a3a3a;
     }
     
-    /* Ultra-Minimal Feature Cards */
-    .feature-card {
-        background: transparent;
-        padding: 0.5rem 0;
-        margin: 0.35rem 0;
-        border-left: 1px solid transparent;
-        padding-left: 0.75rem;
-        transition: all 0.15s ease;
-        color: #5a5a5a;
-        font-size: 0.8rem;
-        font-weight: 300;
+    /* Enhanced Feature Cards */
+    .enhanced-feature-card {
+        background: linear-gradient(135deg, #0f0f0f 0%, #0a0a0a 100%);
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        border: 1px solid #1a1a1a;
+        border-left: 2px solid #2a2a2a;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
     }
     
-    .feature-card:hover {
-        border-left-color: #1a1a1a;
+    .enhanced-feature-card:hover {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+        border-left-color: #ffffff;
+        transform: translateX(3px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .feature-icon {
+        font-size: 1.1rem;
+        margin-right: 0.75rem;
+        filter: grayscale(0.3);
+        transition: all 0.2s ease;
+    }
+    
+    .enhanced-feature-card:hover .feature-icon {
+        filter: grayscale(0);
+        transform: scale(1.1);
+    }
+    
+    .feature-text {
         color: #8a8a8a;
-        padding-left: 1rem;
+        font-size: 0.8rem;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        transition: all 0.2s ease;
+    }
+    
+    .enhanced-feature-card:hover .feature-text {
+        color: #ffffff;
     }
     
     /* Alerts */
@@ -428,39 +503,179 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Ultra-Minimal Fixed Sidebar
+# Check if API key is configured
+if not st.session_state.get('app_ready', False):
+    # Show API Key Setup Screen (Center of page)
+    st.markdown("<div style='height: 10vh;'></div>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
+        <div style='text-align: center; margin-bottom: 3rem;'>
+            <h1 style='color: #ffffff; font-size: 3rem; margin-bottom: 1rem; 
+                       font-weight: 200; letter-spacing: 2px;'>
+                🤖 AI Research Assistant
+            </h1>
+            <p style='color: #6a6a6a; font-size: 1.1rem; font-weight: 300; 
+                      letter-spacing: 1px; margin-bottom: 3rem;'>
+                Powered by Google Gemini AI
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style='background: #0a0a0a; padding: 3rem; border-radius: 12px; 
+                    border: 1px solid #2a2a2a; box-shadow: 0 8px 32px rgba(0,0,0,0.4);'>
+            <h2 style='color: #ffffff; font-size: 1.5rem; margin-bottom: 1rem; 
+                       font-weight: 400; text-align: center;'>
+                🔑 Enter Your API Key
+            </h2>
+            <p style='color: #8a8a8a; font-size: 0.95rem; text-align: center; 
+                      margin-bottom: 2rem; line-height: 1.6;'>
+                To get started, please enter your Google Gemini API key.<br>
+                Your key is stored securely in your browser and never sent to our servers.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.form("initial_api_key_form"):
+            api_key_input = st.text_input(
+                "Google Gemini API Key",
+                type="password",
+                placeholder="AIzaSy...",
+                help="Get your free API key at https://makersuite.google.com/app/apikey",
+                label_visibility="collapsed"
+            )
+            
+            st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
+            
+            submit_btn = st.form_submit_button("🚀 Start Using the App", use_container_width=True)
+            
+            if submit_btn:
+                if api_key_input:
+                    from api_key_manager import validate_api_key
+                    is_valid, error_msg = validate_api_key(api_key_input)
+                    
+                    if is_valid:
+                        st.session_state['user_api_key'] = api_key_input
+                        
+                        # Save to localStorage
+                        import streamlit.components.v1 as components
+                        components.html(
+                            f"""
+                            <script>
+                            localStorage.setItem('gemini_api_key', '{api_key_input}');
+                            </script>
+                            """,
+                            height=0,
+                        )
+                        
+                        st.success("✅ API key saved successfully! Reloading app...")
+                        st.rerun()
+                    else:
+                        st.error(f"❌ {error_msg}")
+                else:
+                    st.error("❌ Please enter your API key to continue")
+        
+        st.markdown("""
+        <div style='margin-top: 2rem; padding: 1.5rem; background: #0f0f0f; 
+                    border-radius: 8px; border-left: 3px solid #2a2a2a;'>
+            <p style='color: #6a6a6a; font-size: 0.85rem; margin-bottom: 0.5rem;'>
+                <strong style='color: #ffffff;'>Don't have an API key?</strong>
+            </p>
+            <p style='color: #8a8a8a; font-size: 0.85rem; line-height: 1.6;'>
+                1. Visit <a href='https://makersuite.google.com/app/apikey' 
+                   target='_blank' style='color: #ffffff; text-decoration: underline;'>
+                   Google AI Studio</a><br>
+                2. Sign in with your Google account<br>
+                3. Click "Create API Key"<br>
+                4. Copy and paste it above
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style='margin-top: 2rem; text-align: center;'>
+            <p style='color: #4a4a4a; font-size: 0.75rem;'>
+                🔒 Your API key is stored locally in your browser<br>
+                and is never transmitted to our servers
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.stop()
+
+# If we reach here, API key is configured - show the main app
+# Minimalist Sidebar (Reference Design)
 with st.sidebar:
+    # Clean Header Section - Centered Text Only
     st.markdown("""
-    <div style='padding: 2rem 0 3rem 0;'>
-        <h1 style='color: #ffffff; font-size: 1.5rem; margin-bottom: 0.5rem; 
-                   font-weight: 200; letter-spacing: 2px;'>
+    <div style='padding: 4rem 2rem 3rem 2rem; text-align: center;'>
+        <h1 style='color: #ffffff; font-size: 1.5rem; margin: 0 0 1rem 0; 
+                   font-weight: 300; letter-spacing: 3px; text-transform: uppercase;'>
             AI RESEARCH
         </h1>
-        <p style='color: #4a4a4a; font-size: 0.75rem; font-weight: 300; 
-                  text-transform: uppercase; letter-spacing: 2px;'>
-            Research Assistant
+        <p style='color: #4a4a4a; font-size: 0.8rem; margin: 0; 
+                  font-weight: 300; letter-spacing: 2px; text-transform: uppercase;'>
+            RESEARCH ASSISTANT
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("<div style='border-top: 1px solid #1a1a1a; margin: 2rem 0;'></div>", unsafe_allow_html=True)
+    # API Key Settings Section
+    render_api_key_settings()
     
-    st.markdown("<p style='color: #6a6a6a; font-size: 0.7rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 400;'>Features</p>", unsafe_allow_html=True)
+    # Divider
     st.markdown("""
-    <div class='feature-card'>Comprehensive Reports</div>
-    <div class='feature-card'>Real-time News</div>
-    <div class='feature-card'>AI Summaries</div>
-    <div class='feature-card'>Q&A Chat</div>
-    <div class='feature-card'>Export & Save</div>
+    <div style='border-top: 1px solid #1a1a1a; margin: 3rem 0;'></div>
     """, unsafe_allow_html=True)
     
-    st.markdown("<div style='border-top: 1px solid #1a1a1a; margin: 3rem 0 2rem 0;'></div>", unsafe_allow_html=True)
-    
+    # Features Section - Simple Text List
     st.markdown("""
-    <div style='padding: 1rem 0;'>
-        <p style='color: #4a4a4a; font-size: 0.7rem; margin-bottom: 0.5rem; 
-                  text-transform: uppercase; letter-spacing: 1.5px;'>Powered by</p>
-        <p style='color: #ffffff; font-weight: 300; font-size: 0.9rem;'>
+    <div style='padding: 0 2rem;'>
+        <h3 style='color: #6a6a6a; font-size: 0.75rem; margin: 0 0 2rem 0; 
+                   font-weight: 400; letter-spacing: 2px; text-transform: uppercase;'>
+            FEATURES
+        </h3>
+        <div style='display: flex; flex-direction: column; gap: 1.5rem;'>
+            <p style='color: #5a5a5a; font-size: 0.9rem; margin: 0; 
+                      font-weight: 300; letter-spacing: 0.5px;'>
+                Comprehensive Reports
+            </p>
+            <p style='color: #5a5a5a; font-size: 0.9rem; margin: 0; 
+                      font-weight: 300; letter-spacing: 0.5px;'>
+                Real-time News
+            </p>
+            <p style='color: #5a5a5a; font-size: 0.9rem; margin: 0; 
+                      font-weight: 300; letter-spacing: 0.5px;'>
+                AI Summaries
+            </p>
+            <p style='color: #5a5a5a; font-size: 0.9rem; margin: 0; 
+                      font-weight: 300; letter-spacing: 0.5px;'>
+                Q&A Chat
+            </p>
+            <p style='color: #5a5a5a; font-size: 0.9rem; margin: 0; 
+                      font-weight: 300; letter-spacing: 0.5px;'>
+                Export & Save
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Divider
+    st.markdown("""
+    <div style='border-top: 1px solid #1a1a1a; margin: 3rem 0;'></div>
+    """, unsafe_allow_html=True)
+    
+    # Powered By Section - Simple Text
+    st.markdown("""
+    <div style='padding: 0 2rem;'>
+        <h3 style='color: #6a6a6a; font-size: 0.75rem; margin: 0 0 1rem 0; 
+                   font-weight: 400; letter-spacing: 2px; text-transform: uppercase;'>
+            POWERED BY
+        </h3>
+        <p style='color: #ffffff; font-size: 0.9rem; margin: 0; 
+                  font-weight: 300; letter-spacing: 0.5px;'>
             Google Gemini AI
         </p>
     </div>
@@ -607,7 +822,7 @@ if topic:
             except Exception as e:
                 st.error(f"❌ Error generating report: {str(e)}")
 
-    if generate_news:
+    elif generate_news:
         with st.spinner("📰 Fetching latest news and updates..."):
             try:
                 news_text = fetch_news_content(topic)
@@ -616,7 +831,7 @@ if topic:
             except Exception as e:
                 st.error(f"❌ Error fetching news: {str(e)}")
 
-    if generate_summary:
+    elif generate_summary:
         if st.session_state.get('report'):
             with st.spinner("📄 Creating intelligent summary..."):
                 try:
