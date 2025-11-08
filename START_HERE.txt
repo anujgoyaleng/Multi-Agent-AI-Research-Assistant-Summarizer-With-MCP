@@ -1,0 +1,110 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║              🤖 AI RESEARCH ASSISTANT & SUMMARIZER                       ║
+║                                                                          ║
+║                         WELCOME! START HERE                              ║
+║                                                                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+📚 DOCUMENTATION GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👉 NEW USERS - Start with these files in order:
+
+   1. QUICK_START.md       → Step-by-step setup guide (START HERE!)
+   2. README.md            → Complete project documentation
+   3. SUMMARY.md           → What was improved in this version
+
+📖 ADDITIONAL RESOURCES:
+
+   • CHANGELOG.md          → Version history and updates
+   • CONTRIBUTING.md       → How to contribute to the project
+   • PROJECT_INFO.md       → Comprehensive project overview
+   • TRANSFORMATION.md     → Before/after comparison
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 QUICK SETUP (Windows)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Step 1: Run setup.bat (first time only)
+   Step 2: Edit .env file with your API key
+   Step 3: Run run.bat to launch the app
+
+   That's it! The app will open in your browser automatically.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔑 GET YOUR API KEY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Visit: https://makersuite.google.com/app/apikey
+   
+   1. Sign in with your Google account
+   2. Click "Create API Key"
+   3. Copy the key
+   4. Paste it in your .env file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 PROJECT STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Core Files:
+   • app.py              → Main application
+   • llm.py              → LLM configuration
+   • feedback.py         → Feedback system
+   • get_mcp.py          → MCP integration (optional)
+
+   Setup:
+   • setup.bat           → Automated setup (Windows)
+   • run.bat             → Launch script (Windows)
+   • requirements.txt    → Dependencies
+   • .env.example        → Environment template
+
+   Documentation:
+   • README.md           → Main documentation
+   • QUICK_START.md      → Setup guide
+   • CHANGELOG.md        → Version history
+   • CONTRIBUTING.md     → Contribution guide
+   • PROJECT_INFO.md     → Project overview
+   • SUMMARY.md          → Enhancement summary
+   • TRANSFORMATION.md   → Before/after comparison
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   ✅ Generate comprehensive research reports
+   ✅ Fetch latest news and updates
+   ✅ Create smart AI summaries
+   ✅ Interactive Q&A chat
+   ✅ Auto-save reports
+   ✅ Export to Markdown
+   ✅ AI-powered feedback system
+   ✅ Modern, beautiful UI
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❓ NEED HELP?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   1. Check QUICK_START.md for setup issues
+   2. Review README.md for detailed documentation
+   3. See CONTRIBUTING.md for contribution guidelines
+   4. Open an issue on GitHub for bugs
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 READY TO START?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Open QUICK_START.md and follow the simple 3-step process!
+
+   Happy researching! 🚀
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Made with 💜 and ☕ by Ayush Ghosh
+Version 2.0.0 | November 2025
